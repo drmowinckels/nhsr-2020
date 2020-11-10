@@ -264,10 +264,10 @@ ggseg3d(atlas = aseg_3d) %>%
 ```
 ]
 
-.pull-right[
-```{r, fig.height=5, ref.label="ggseg3d-2", echo = FALSE, warning=FALSE, message=FALSE}
-```
-]
+<!-- .pull-right[ -->
+<!-- ```{r, fig.height=5, ref.label="ggseg3d-2", echo = FALSE, warning=FALSE, message=FALSE} -->
+<!-- ``` -->
+<!-- ] -->
 
 ---
 class: middle, center, dark
