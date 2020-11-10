@@ -86,8 +86,8 @@ background-size: contain
 - MRI analyses run large numbers of comparisons just within a single subjects' brain, and issues with multiple comparisons need to be dealt with
 
 ---
-background-image: url(https://developmentalimagingmcri.github.io/freesurfer_statsurf_display/img/parc_aparc_fsrgb.png)
-background-size: cover
+background-image: url(https://www.researchgate.net/profile/Arno_Klein2/publication/233889622/figure/fig2/AS:271987822034957@1441858358467/Regions-in-the-DKT-cortical-labeling-protocol-Cortical-regions-of-interest-included-in.png)
+background-size: contain
 
 ???
 - To reduce this problem, the brain is often reduced to a smaller set of functionally or structurally meaningful parcellations
