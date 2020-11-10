@@ -501,6 +501,7 @@ will require:
 - Linux or macOS  
 - [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) installed  
 - [ImageMagick](https://imagemagick.org/script/download.php) installed  
+- some minor manual post-processing tweaking  
 
 ]
 
