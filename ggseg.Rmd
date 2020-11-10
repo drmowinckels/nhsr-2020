@@ -1,0 +1,583 @@
+---
+title: "Visualizing brain data"
+subtitle: "- the ggseg-suite of R-packages  -"
+author: "Athanasia Monika Mowinckel"
+date: "`r format(Sys.Date(), '%d - %b - %Y')`"
+output:
+  xaringan::moon_reader:
+    css: [lcbc-uio.css, lcbc-uio-fonts.css, default]
+    lib_dir: libs
+    nature:
+      titleSlideClass: [middle, right]
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false 
+      ratio: "16:9"
+---
+
+```{r setup, include=FALSE}
+# Here you can place global options for the entire document.
+# Mostly used for knitr settings, but can also load data etc.
+# Whatever happens here will not show in the presentation.
+knitr::opts_chunk$set(echo = TRUE,
+                    out.width = "100%",
+                    fig.retina = 3)
+library(knitr)
+library(kableExtra)
+```
+
+class: middle
+
+.pull-left[
+```{r echo = FALSE, out.height="600px", out.width="auto"}
+knitr::include_graphics("https://www.sv.uio.no/psi/personer/vit/athanasm/athanasia.mowinckel.2.small.png")
+```
+]
+
+.pull-right[
+## Athanasia Monika Mowinckel
+
+- Staff scientist  
+- PhD in cognitive psychology  
+- Software Carpentry Instructor  
+- Currently doing quite some R-package development & other in-house research software development  
+
+- Find me
+    - Twitter: [DrMowinckels](https://twitter.com/DrMowinckels)    
+    - GitHub: [Athanasiamo](https://github.com/Athanasiamo)  
+    - Website/Blog: [DrMowinckels.io](https://drmowinckels.io/)
+
+]
+
+---
+background-image: url(https://www.lifebrain.uio.no/vrtx/decorating/resources/images/logo.png), url(https://www.lifebrain.uio.no/web-banner_rev.jpg), url(https://www.lifebrain.uio.no/vrtx/decorating/resources/images/eu-flag.jpg)
+background-position: 50% 10%, 50% 80%, 90% 10% 
+
+---
+
+layout: true
+    
+<div class="my-sidebar"></div> 
+
+
+---
+class: dark, center, middle
+
+# Neuroimaging workflows
+
+---
+background-image: url(https://fsl.fmrib.ox.ac.uk/fsl/wiki_static/fsl/img/fsl-logo-x2.png), url(https://freesurfer2016.sciencesconf.org/conference/freesurfer2016/pages/FSlogo.png), url(https://nipype.readthedocs.io/en/latest/_static/nipype-banner-bg.png), url(https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/98b0f6cf-f7e6-4051-b4f4-2aacf06f551b/a5cdc6ec-7ee3-4aaa-afbd-f283c68dd149/images/screenshot.png)
+background-size: 20%, 40%, 50%, 20%
+background-position: 20% 45%, 70% 45%, 85% 90%, 20% 95%
+
+## MRI analyses are usually run in specialized software
+
+???
+- run in specialized software
+- but results and dissemination is usually run in stats software
+- switching between different software creates workflows that are hard to reproduce and keep track of
+
+---
+background-image: url(https://visceralmind.files.wordpress.com/2017/04/voxel-brain.jpg?w=1024)
+background-size: contain
+
+???
+- the images are 3d matrices of 1mm cubic voxels, usually around 100 thousand voxels per brain
+- MRI analyses run large numbers of comparisons just within a single subjects' brain, and issues with multiple comparisons need to be dealt with
+
+---
+background-image: url(https://developmentalimagingmcri.github.io/freesurfer_statsurf_display/img/parc_aparc_fsrgb.png)
+background-size: cover
+
+???
+- To reduce this problem, the brain is often reduced to a smaller set of functionally or structurally meaningful parcellations
+- here: the DK cortical atlas on an inflated brain (blown up like a balloon) to see also inside the grooves
+- measurements are extracted from these regions for metrics like coritcal thickness, surface area, gyrification index etc. and used in statistical models
+
+---
+class: center, dark
+background-image: url(img/ggseg.png), url(img/ggseg3d.png), url(img/ggsegExtra.png)
+background-size: 15%
+background-position: 41% 43%, 59% 43%, 50% 77%
+
+# ggseg-suite
+
+.pull-left[
+  2d polygons / geospatial
+]
+
+--
+
+.pull-left[
+  3d mesh / tri-surface
+]
+
+--
+
+<br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br>
+atlas creation / installation
+
+---
+class: middle, center, dark
+background-image: url(img/ggseg.png)
+background-size: 18%
+background-position: 50% 10%
+# 
+## Plotting 2d representations as polygons
+
+---
+class: middle
+
+.pull-left[
+```{r ggseg1, eval = FALSE}
+library(ggseg, quietly = TRUE)
+
+ggseg(atlas = dk,  #<<
+      mapping = aes(fill = region), #<<
+      colour = "black",
+      show.legend = FALSE) +
+  scale_fill_brain("dk")
+
+ggseg(atlas = dk, 
+      mapping = aes(fill = region),
+      colour = "black",
+      position = "stacked", #<<
+      show.legend = FALSE) +
+  scale_fill_brain("dk")
+```
+]
+
+.pull-right[
+```{r, fig.height=4, ref.label="ggseg1", echo = FALSE}
+```
+]
+
+---
+
+.pull-left[
+## Using results data
+
+```{r ggseg3, eval = FALSE}
+library(dplyr, quietly = TRUE)
+someData <- tibble(
+  region = rep(c("transverse temporal", 
+             "insula",
+           "precentral",
+           "superior parietal"),2),
+  p = sample(seq(0,.5,.001), 8),
+  Group = c(rep("G1",4), rep("G2",4))) 
+
+someData %>% 
+  ggseg(atlas = dk, 
+        position = "stacked",
+        colour = "black",
+        mapping = aes(fill = p)) #<<
+```
+]
+
+.pull-right[
+```{r, fig.height=4, ref.label="ggseg3", echo = FALSE}
+```
+]
+
+---
+
+.pull-left[
+## Faceting groups
+
+```{r ggseg4, eval = FALSE}
+someData %>% 
+  group_by(Group) %>% #<<
+  ggseg(atlas = dk, 
+        position = "stacked",
+        colour = "black",
+        mapping = aes(fill = p)) +
+  facet_wrap(~Group, #<<
+             nrow = 2) #<<
+```
+]
+
+.pull-right[
+```{r, fig.height=8, ref.label="ggseg4", echo = FALSE}
+```
+]
+
+
+---
+class: middle
+
+.pull-left[
+## Subcortical atlases
+
+```{r ggseg2, eval = FALSE}
+ggseg(atlas = aseg,  #<<
+      mapping = aes(fill = region),
+      colour = "black",
+      show.legend = FALSE) +
+  scale_fill_brain("aseg")
+```
+]
+
+.pull-right[
+```{r, fig.height=4, ref.label="ggseg2", echo = FALSE}
+```
+]
+
+
+---
+class: middle, center, dark
+background-image: url(img/ggseg3d.png)
+background-size: 18%
+background-position: 50% 10%
+# 
+## Plotting 3d triangular meshes
+
+---
+class: middle
+
+.pull-left[
+## Powered by plotly
+### Fully interactive
+```{r ggseg3d-1, eval = FALSE}
+library(ggseg3d, quietly = TRUE)
+ggseg3d(atlas = dk_3d)
+```
+]
+
+.pull-right[
+```{r, fig.height=5, ref.label="ggseg3d-1", echo = FALSE, warning=FALSE, message=FALSE}
+```
+]
+
+---
+class: middle
+
+.pull-left[
+## subcortical structure
+### with glass brain for reference
+```{r ggseg3d-2, eval = FALSE}
+library(magrittr, quietly = TRUE)
+ggseg3d(atlas = aseg_3d) %>% 
+  add_glassbrain(hemisphere = "left") %>% 
+  remove_axes()
+```
+]
+
+<!-- .pull-right[ -->
+<!-- ```{r, fig.height=5, ref.label="ggseg3d-2", echo = FALSE, warning=FALSE, message=FALSE} -->
+<!-- ``` -->
+<!-- ] -->
+
+---
+class: middle, center, dark
+background-image: url(img/ggsegExtra.png)
+background-size: 18%
+background-position: 50% 10%
+# 
+## Creating and instaling atlases
+
+
+---
+
+```{r, eval = FALSE}
+library(ggsegExtra)
+ggseg_atlas_repos()
+```
+
+
+```{r, echo = FALSE}
+library(ggsegExtra, quietly = TRUE)
+ggseg_atlas_repos() %>% 
+  kable(format = "html") %>% 
+  kable_styling()
+```
+
+---
+
+
+.pull-left[
+
+```{r, eval = FALSE}
+install_ggseg_atlas("LCBC-UiO/ggsegYeo2011", 
+                    "github")
+```
+```{r, echo=FALSE}
+library(ggsegYeo2011)
+yeo7$type = "cortical"
+yeo17$type = "cortical"
+```
+
+
+```{r "yeo", eval=FALSE}
+library(ggsegYeo2011)
+
+ggseg(atlas = yeo7, 
+      colour = "black",
+      mapping = aes(fill = region)) +
+  scale_fill_brain("yeo7", 
+                   package = "ggsegYeo2011")
+
+ggseg(atlas = yeo17, 
+      colour = "black",
+      mapping = aes(fill = region)) +
+  scale_fill_brain("yeo17", 
+                   package = "ggsegYeo2011")
+```
+]
+
+.pull-right[
+```{r "yeo.out", echo = FALSE, ref.label="yeo", fig.height=4}
+```
+]
+
+
+---
+
+# Creating new atlases
+
+Currently only possible for 
+cortical atlases
+
+.pull-left[
+
+```{r, eval = FALSE}
+# Make brain atlases into
+# 3d plotly mesh atlas
+make_aparc_2_3datlas()
+
+# Turn plotly mesh atlas
+# into 2d polygon atlas
+make_ggseg3d_2_ggseg()
+```
+
+
+]
+
+.pull-right[
+```{r, echo = FALSE,  fig.height=6}
+library(ggsegGlasser)
+glasser$type <- "cortical"
+
+ggseg(atlas = glasser, 
+      mapping = aes(fill = region),
+      colour = "black",
+      show.legend = FALSE,
+      position = "stacked") +
+  scale_fill_brain("glasser", 
+                   package = "ggsegGlasser")
+```
+]
+
+
+---
+class: middle, center, dark
+
+# Upcoming features
+
+---
+background-image: url(img/ggseg.png)
+background-size: 10%
+background-position: 7% 97%
+
+```{r, out.width="90%"}
+dk
+```
+
+---
+background-image: url(img/ggseg.png)
+background-size: 10%
+background-position: 7% 97%
+
+```{r, fig.height=4}
+plot(dk)
+```
+
+---
+background-image: url(img/ggseg.png)
+background-size: 10%
+background-position: 7% 97%
+
+```{r, fig.height=4}
+brain_regions(dk)
+```
+
+---
+background-image: url(img/ggseg.png)
+background-size: 10%
+background-position: 7% 90%
+
+# From polygons to sf-spatial
+
+.pull-left[
+```{r "sf1", fig.height=3, eval = FALSE}
+ggplot() + 
+  geom_brain(atlas = dk, 
+             show.legend = FALSE) +
+  scale_fill_brain2(palette = dk$palette)
+```
+]
+
+.pull-right[
+```{r sf1-out, ref.label="sf1", echo = FALSE}
+```
+]
+
+---
+background-image: url(img/ggseg.png)
+background-size: 10%
+background-position: 7% 97%
+class: middle
+
+
+.pull-left[
+```{r "sf2", fig.height=3, eval = FALSE}
+ggplot() + 
+  geom_brain(atlas = dk, 
+      show.legend = FALSE,
+      position = position_brain(hemi ~ side)) + #<<
+  scale_fill_brain2(palette = dk$palette)
+```
+]
+
+.pull-right[
+```{r sf2-out, ref.label="sf2",fig.height=5, echo = FALSE}
+```
+]
+
+
+---
+background-image: url(img/ggseg.png)
+background-size: 10%
+background-position: 7% 97%
+class: middle
+
+.pull-left[
+```{r "sf3", fig.height=3, eval = FALSE}
+ggplot() + 
+  geom_brain(atlas = dk, 
+      show.legend = FALSE,
+      position = position_brain(side ~ hemi)) + #<<
+  scale_fill_brain2(palette = dk$palette)
+```
+]
+
+.pull-right[
+```{r sf3-out, ref.label="sf3", fig.height=5, echo = FALSE}
+```
+]
+
+---
+background-image: url(img/ggseg.png)
+background-size: 10%
+background-position: 7% 97%
+.pull-left[
+```{r "sf4", fig.height=3, eval = FALSE}
+ggplot() + 
+  geom_brain(atlas = dk, 
+      show.legend = FALSE,
+      position = position_brain(side + hemi ~ . )) + #<<
+  scale_fill_brain2(palette = dk$palette)
+```
+]
+
+.pull-right[
+```{r sf4-out, ref.label="sf4",  echo = FALSE}
+```
+]
+
+---
+background-image: url(img/ggsegExtra.png)
+background-size: 10%
+background-position: 7% 97%
+
+## Create subcortical ggseg atlas automatically
+.pull-left[
+```{r, fig.height=3, eval = FALSE}
+make_subcort_ggseg()
+```
+
+will require:
+- Linux or macOS  
+- [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) installed  
+- [ImageMagick](https://imagemagick.org/script/download.php) installed  
+
+]
+
+.pull-right[
+
+```{r, fig.height=5, echo = FALSE}
+ggseg(atlas = aseg,
+      mapping = aes(fill = region)) +
+  scale_fill_brain("aseg")
+```
+
+]
+---
+class: dark, middle, center
+
+# [Neuroconductor](https://neuroconductor.org/)
+
+---
+class: dark, middle, center
+
+# [gganatogram](https://github.com/jespermaag/gganatogram)
+
+---
+## gganatogram
+.pull-left[
+```{r, eval=TRUE, echo=FALSE, fig.width = 8, fig.height = 8}
+library(gganatogram)
+hgMale <- gganatogram(data=hgMale_key, fillOutline='#440154FF', organism='human', sex='male', fill="value") + theme_void() + viridis::scale_fill_viridis()
+hgFemale <- gganatogram(data=hgFemale_key, fillOutline='#440154FF', organism='human', sex='female', fill="value") + theme_void() + viridis::scale_fill_viridis()
+mmMale <- gganatogram(data=mmMale_key, fillOutline='#440154FF', organism='mouse', sex='male', fill="value") + theme_void()  + viridis::scale_fill_viridis()
+mmFemale <- gganatogram(data=mmFemale_key, outline = T, fillOutline='#440154FF', organism='mouse', sex='female', fill="value")  +theme_void()   + viridis::scale_fill_viridis()
+gridExtra::grid.arrange(hgMale, hgFemale, mmMale, mmFemale, ncol=2)
+```
+]
+.pull-right[
+```{r,  eval=TRUE, echo=FALSE, fig.width = 8, fig.height = 4}
+p1 <- gganatogram(data=cell_key[['cell']], outline = T, fillOutline='steelblue', organism="cell", fill="colour")  +theme_void()  + coord_fixed() + viridis::scale_fill_viridis()
+p2 <- gganatogram(data=cell_key[['cell']], outline = T, fillOutline='lightgray', organism="cell", fill="value")  +theme_void() + coord_fixed() + viridis::scale_fill_viridis()
+gridExtra::grid.arrange(p1, p2, ncol=2)
+```
+]
+---
+class: center, dark
+background-image: url(img/ggseg.png), url(img/ggseg3d.png), url(img/ggsegExtra.png)
+background-size: 15%
+background-position: 41% 43%, 59% 43%, 50% 77%
+
+# ggseg-suite
+
+.pull-left[
+  2d polygons / geospatial
+]
+
+
+.pull-left[
+  3d mesh / tri-surface
+]
+
+<br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br>
+atlas creation / installation
+
+
+---
+class: title-slide, middle, right
+
+# Thanks to our lab 
+# for funding to develop 
+# these tools
+
+[oslobrains.no](https://www.oslobrains.no/)
+
+---
+class: center, inverse
+background-image: url(https://www.sv.uio.no/psi/english/people/aca/didacvp/didacvp.jpg), url(https://www.sv.uio.no/psi/personer/vit/athanasm/athanasia.mowinckel.2.small.png)
+background-position: 41% 70%, 59% 70%
+background-size: 15%
+
+# Thank you for listening
+## on behalf of Didac Vidal-Piñeiro and myself
